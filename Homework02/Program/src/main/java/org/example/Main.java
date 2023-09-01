@@ -152,7 +152,22 @@ public class Main {
      * Обработка хода компьютера
      */
     private static void aiTurn() {
-        int[] point = findTurnAI();
+        int[] point = new int[2];
+        if (!findTurnAI(DOT_HUMAN, point, 1)) {
+            boolean findCheck = false;
+            for (int i = 1; i < winCount - 1; i++) {
+                if (findTurnAI(DOT_AI, point, i)) {
+                    findCheck = true;
+                    break;
+                }
+            }
+            if (!findCheck) {
+                do {
+                    point[0] = random.nextInt(fieldSizeX);
+                    point[1] = random.nextInt(fieldSizeY);
+                } while (!isCellEmpty(point[0], point[1]));
+            }
+        }
         field[point[1]][point[0]] = DOT_AI;
     }
 
@@ -161,28 +176,21 @@ public class Main {
      *
      * @return координаты
      */
-    private static int[] findTurnAI() {
-        int[] point = new int[2];
-        if (checkSide(DOT_HUMAN, 0, fieldSizeX - winCount + 1, fieldSizeY, 1, 0,
-                winCount - 1, point)) {
-            return point;
-        } else if (checkSide(DOT_HUMAN, 0, fieldSizeX, fieldSizeY - winCount + 1, 0,
-                1, winCount - 1, point)) {
-            return point;
-        } else if (checkSide(DOT_HUMAN, 0, fieldSizeX - winCount + 1,
-                fieldSizeY - winCount + 1, 1, 1, winCount - 1, point)) {
-            return point;
-        } else if (checkSide(DOT_HUMAN, winCount - 1, fieldSizeX - winCount + 1, fieldSizeY,
-                1, -1, winCount - 1, point)) {
-            return point;
-        } else {
-            do {
-                point[0] = random.nextInt(fieldSizeX);
-                point[1] = random.nextInt(fieldSizeY);
-            } while (!isCellEmpty(point[0], point[1]));
-            return point;
+    private static boolean findTurnAI(char c, int[] point, int winCoef) {
+        if (checkSide(c, 0, fieldSizeX - winCount + 1, fieldSizeY, 1, 0,
+                winCount - winCoef, point)) {
+            return true;
+        } else if (checkSide(c, 0, fieldSizeX, fieldSizeY - winCount + 1, 0,
+                1, winCount - winCoef, point)) {
+            return true;
+        } else if (checkSide(c, 0, fieldSizeX - winCount + 1,
+                fieldSizeY - winCount + 1, 1, 1, winCount - winCoef, point)) {
+            return true;
+        } else if (checkSide(c, winCount - 1, fieldSizeX - winCount + 1, fieldSizeY,
+                1, -1, winCount - winCoef, point)) {
+            return true;
         }
-
+        return false;
     }
 
     /**
