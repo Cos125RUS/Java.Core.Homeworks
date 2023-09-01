@@ -152,12 +152,37 @@ public class Main {
      * Обработка хода компьютера
      */
     private static void aiTurn() {
-        int x, y;
-        do {
-            x = random.nextInt(fieldSizeX);
-            y = random.nextInt(fieldSizeY);
-        } while (!isCellEmpty(x, y));
-        field[y][x] = DOT_AI;
+        int[] point = findTurnAI();
+        field[point[1]][point[0]] = DOT_AI;
+    }
+
+    /**
+     * Поиск оптимального хода ИИ
+     *
+     * @return координаты
+     */
+    private static int[] findTurnAI() {
+        int[] point = new int[2];
+        if (checkSide(DOT_HUMAN, 0, fieldSizeX - winCount + 1, fieldSizeY, 1, 0,
+                winCount - 1, point)) {
+            return point;
+        } else if (checkSide(DOT_HUMAN, 0, fieldSizeX, fieldSizeY - winCount + 1, 0,
+                1, winCount - 1, point)) {
+            return point;
+        } else if (checkSide(DOT_HUMAN, 0, fieldSizeX - winCount + 1,
+                fieldSizeY - winCount + 1, 1, 1, winCount - 1, point)) {
+            return point;
+        } else if (checkSide(DOT_HUMAN, winCount - 1, fieldSizeX - winCount + 1, fieldSizeY,
+                1, -1, winCount - 1, point)) {
+            return point;
+        } else {
+            do {
+                point[0] = random.nextInt(fieldSizeX);
+                point[1] = random.nextInt(fieldSizeY);
+            } while (!isCellEmpty(point[0], point[1]));
+            return point;
+        }
+
     }
 
     /**
@@ -167,17 +192,20 @@ public class Main {
      * @return наличие победы
      */
     private static boolean checkWin(char c) {
-        return (checkSide(c, 0, fieldSizeX - winCount + 1, fieldSizeY, 1, 0) ||
-                checkSide(c, 0, fieldSizeX, fieldSizeY - winCount + 1, 0, 1) ||
-                checkSide(c, 0, fieldSizeX - winCount + 1, fieldSizeY- winCount + 1,
-                        1, 1) ||
+        return (checkSide(c, 0, fieldSizeX - winCount + 1, fieldSizeY, 1, 0,
+                winCount, new int[2]) ||
+                checkSide(c, 0, fieldSizeX, fieldSizeY - winCount + 1, 0, 1,
+                        winCount, new int[2]) ||
+                checkSide(c, 0, fieldSizeX - winCount + 1, fieldSizeY - winCount + 1,
+                        1, 1, winCount, new int[2]) ||
                 checkSide(c, winCount - 1, fieldSizeX - winCount + 1, fieldSizeY, 1,
-                        -1));
+                        -1, winCount, new int[2]));
     }
 
     /**
      * Проверка выигрыша по всем измерениям
-     * @param c фишка
+     *
+     * @param c     фишка
      * @param start стартовая клетка по вертикали
      * @param sizeX ограничение поля по Х
      * @param sizeY ограничение поля по У
@@ -185,35 +213,27 @@ public class Main {
      * @param stepY шаг по У
      * @return результат проверки
      */
-    private static boolean checkSide(char c, int start, int sizeX, int sizeY, int stepX, int stepY) {
+    private static boolean checkSide(char c, int start, int sizeX, int sizeY, int stepX, int stepY,
+                                     int toWin, int[] point) {
         for (int i = start; i < sizeY; i++) {
             for (int j = 0; j < sizeX; j++) {
-                boolean check = true;
+                int checkCount = 0;
+                boolean checkWin = true;
                 for (int l = 0; l < winCount; l++) {
-                    if (field[i + l * stepY][j + l * stepX] != c) {
-                        check = false;
-                        break;
+                    if (field[i + l * stepY][j + l * stepX] == c) {
+                        checkCount++;
+                    } else if (field[i + l * stepY][j + l * stepX] == DOT_EMPTY) {
+                        point[0] = j + l * stepX;
+                        point[1] = i + l * stepY;
+                    } else {
+                        checkWin = false;
                     }
                 }
-                if (check) return true;
+                if (checkCount == toWin && checkWin) return true;
             }
         }
 
         return false;
-    }
-
-    /**
-     * Проверка на ничью
-     *
-     * @return результат проверки
-     */
-    private static boolean checkDraw() {
-        for (int x = 0; x < fieldSizeX; x++) {
-            for (int y = 0; y < fieldSizeY; y++) {
-                if (isCellEmpty(x, y)) return false;
-            }
-        }
-        return true;
     }
 
     /**
