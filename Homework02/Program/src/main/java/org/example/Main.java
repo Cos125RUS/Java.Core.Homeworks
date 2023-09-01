@@ -12,7 +12,8 @@ public class Main {
     private static int fieldSizeX; //Размер поля по X
     private static int fieldSizeY; //Размер поля по Y
     private static int winCount; //Выигрышная комбинация
-    private static int turnCount; //Количество возможных ходов
+    private static int turnCount; //Счётчик ходов
+    private static int turnQuantity; //Количество возможных ходов
     private static final Scanner scanner = new Scanner(System.in);
     private static final Random random = new Random();
 
@@ -23,10 +24,12 @@ public class Main {
             printField();
             while (true) {
                 humanTurn();
+                turnCount++;
                 printField();
                 if (checkGameOver(DOT_HUMAN, "Победа!"))
                     break;
                 aiTurn();
+                turnCount++;
                 printField();
                 if (checkGameOver(DOT_AI, "Поражение"))
                     break;
@@ -78,6 +81,8 @@ public class Main {
         fieldSizeX = x;
         fieldSizeY = y;
         winCount = win;
+        turnCount = 0;
+        turnQuantity = fieldSizeX * fieldSizeY;
         field = new char[fieldSizeY][fieldSizeX];
         for (int i = 0; i < fieldSizeY; i++) {
             for (int j = 0; j < fieldSizeX; j++) {
@@ -198,99 +203,6 @@ public class Main {
     }
 
     /**
-     * Проверка выигрыша по горизонтали
-     *
-     * @param c фишка
-     * @return результат проверки
-     */
-    private static boolean checkHorizon(char c) {
-        for (int i = 0; i < fieldSizeY; i++) {
-            for (int j = 0; j <= fieldSizeX - winCount; j++) {
-                boolean check = true;
-                for (int l = 0; l < winCount; l++) {
-                    if (field[i][j + l] != c) {
-                        check = false;
-                        break;
-                    }
-                }
-                if (check) return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Проверка выигрыша по вертикали
-     *
-     * @param c фишка
-     * @return результат проверки
-     */
-    private static boolean checkVertical(char c) {
-        for (int i = 0; i <= fieldSizeY - winCount; i++) {
-            for (int j = 0; j < fieldSizeX; j++) {
-                boolean check = true;
-                for (int l = 0; l < winCount; l++) {
-                    if (field[i + l][j] != c) {
-                        check = false;
-                        break;
-                    }
-                }
-                if (check) return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Проверка выигрыша по диагонали вниз
-     *
-     * @param c фишка
-     * @return результат проверки
-     */
-    private static boolean checkDiagonalDown(char c) {
-        for (int i = 0; i <= fieldSizeY - winCount; i++) {
-            for (int j = 0; j <= fieldSizeX - winCount; j++) {
-                boolean check = true;
-                for (int l = 0; l < winCount; l++) {
-                    if (field[i + l][j + l] != c) {
-                        check = false;
-                        break;
-                    }
-                }
-                if (check) return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Проверка выигрыша по диагонали вверх
-     *
-     * @param c фишка
-     * @return результат проверки
-     */
-    private static boolean checkDiagonalUp(char c) {
-        for (int i = winCount - 1; i < fieldSizeY; i++) {
-            for (int j = 0; j <= fieldSizeX - winCount; j++) {
-                boolean check = true;
-                for (int l = 0; l < winCount; l++) {
-                    if (field[i - l][j + l] != c) {
-                        check = false;
-                        break;
-                    }
-                }
-                if (check) return true;
-            }
-        }
-
-        return false;
-    }
-
-
-    /**
      * Проверка на ничью
      *
      * @return результат проверки
@@ -315,9 +227,9 @@ public class Main {
         if (checkWin(c)) {
             System.out.println(s);
             return true;
-        } else if (checkDraw()) {
+        } else if (turnCount == turnQuantity) {
             System.out.println("Ничья");
-            return false;
+            return true;
         } else
             return false;
     }
